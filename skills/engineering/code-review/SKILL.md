@@ -59,6 +59,8 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 Send a single message with two `Agent` tool calls. Use the `general-purpose` subagent for both.
 
+Pass `model: "sonnet"` on both calls — each axis verifies against an explicit rubric (the standards + smell baseline, the spec), which is worker-model work. You stay the arbiter: if a finding would block the change and looks contestable, re-verify that one finding yourself rather than trusting either report blind.
+
 **Standards sub-agent prompt** — include:
 
 - The full diff command and commit list.

@@ -20,6 +20,8 @@ Show this to the user, then immediately proceed to Step 2. The user reads and th
 
 Spawn 3+ sub-agents in parallel using the Agent tool. Each must produce a **radically different** interface for the deepened module.
 
+This is a wide-solution-space pattern, so don't economize on the candidates: give each sub-agent an **Opus-class model** (pass `model: "opus"`) — cheap workers converge on the obvious design. Keep the Step 3 comparison and recommendation in the main session; don't delegate the judging to a worker.
+
 Prompt each sub-agent with a separate technical brief (file paths, coupling details, dependency category from [DEEPENING.md](DEEPENING.md), what sits behind the seam). The brief is independent of the user-facing problem-space explanation in Step 1. Give each agent a different design constraint:
 
 - Agent 1: "Minimize the interface — aim for 1–3 entry points max. Maximise leverage per entry point."

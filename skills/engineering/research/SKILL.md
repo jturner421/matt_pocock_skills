@@ -5,6 +5,8 @@ description: Investigate a question against high-trust primary sources and captu
 
 Spin up a **background agent** to do the research, so you keep working while it reads.
 
+Run it on a Sonnet-class model (`model: "sonnet"`) — following sources and taking cited notes is worker-shaped. If the findings will arbitrate conflicting sources or drive an architectural choice, review the written note critically yourself before relying on it.
+
 Its job:
 
 1. Investigate the question against **primary sources** — official docs, source code, specs, first-party APIs — not a secondary write-up of them. Follow every claim back to the source that owns it.
