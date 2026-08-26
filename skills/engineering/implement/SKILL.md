@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 Implement the work described by the user in the spec or tickets.
 
+If the work is a Jira ticket, transition it to In Progress before starting (commands in the repo's `docs/agents/issue-tracker.md`).
+
 Before writing code, make the unknowns explicit: note the parts of the spec most likely to change (data models, interfaces, UX flows) and anything it leaves open. Resolve open questions by reading references or asking the user — not by guessing silently.
 
 If a CODING_STANDARDS.md exists at the project root, read it before writing any code and follow it throughout — don't defer standards to review time.
@@ -21,3 +23,5 @@ Keep a short running note of deviations from the spec as they happen — when an
 Once done, use /code-review to review the work.
 
 Commit your work to the current branch.
+
+When the work is a Jira ticket: commit via `/gl:commit` after code-review approval and, when the work warrants a merge request, open it with `/gl:create_mr`. The ticket closes when the MR merges — never close it by hand.
