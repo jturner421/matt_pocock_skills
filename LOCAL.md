@@ -40,3 +40,12 @@ renames skills, re-run `scripts/link-skills.sh`.
   concern; the fork does not create or re-sync `docs/` pages for skills it
   adds **or modifies** — upstream's pages drift from the fork's behaviour and
   that is accepted.
+
+## Fork-owned files
+
+Files that exist only in this fork (upstream never sees them):
+
+- `skills/engineering/setup-matt-pocock-skills/issue-tracker-jira-dc.md` —
+  Jira Data Center tracker template (curl/REST conventions, WD project,
+  wayfinding operations). Referenced by insertion-only additions in that
+  skill's SKILL.md.

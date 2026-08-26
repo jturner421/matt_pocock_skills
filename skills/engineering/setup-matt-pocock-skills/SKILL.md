@@ -43,6 +43,7 @@ Default posture: these skills were designed for GitHub. If a `git remote` points
 
 - **GitHub**: issues live in the repo's GitHub Issues (uses the `gh` CLI)
 - **GitLab**: issues live in the repo's GitLab Issues (uses the [`glab`](https://gitlab.com/gitlab-org/cli) CLI)
+- **Jira Data Center**: issues live in a shared Jira DC project, scoped per-repo by a slug label (uses curl against the REST API). Propose this when `.claude.env` sets `JIRA_SLUG` or the user names Jira.
 - **Local markdown**: issues live as files under `.scratch/<feature>/` in this repo (good for solo projects or repos without a remote)
 - **Other** (Jira, Linear, etc.): ask the user to describe the workflow in one paragraph; the skill will record it as freeform prose
 
@@ -105,6 +106,7 @@ Then write the docs files using the seed templates in this skill folder as a sta
 
 - [issue-tracker-github.md](./issue-tracker-github.md): GitHub issue tracker
 - [issue-tracker-gitlab.md](./issue-tracker-gitlab.md): GitLab issue tracker
+- [issue-tracker-jira-dc.md](./issue-tracker-jira-dc.md): Jira Data Center issue tracker (replace the `<slug>`/`[SLUG]` placeholders from `JIRA_SLUG`)
 - [issue-tracker-local.md](./issue-tracker-local.md): local-markdown issue tracker
 - [triage-labels.md](./triage-labels.md): label mapping (only if `triage` is installed)
 - [domain.md](./domain.md): domain doc consumer rules + layout
