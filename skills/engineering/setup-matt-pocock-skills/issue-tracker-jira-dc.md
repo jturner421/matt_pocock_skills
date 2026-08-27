@@ -10,7 +10,7 @@ BASE="https://cfatl-jira.nsapps.dcn/jira/rest/api/2"
 
 All commands below were verified against the live instance on 2026-08-26.
 
-## Auth bootstrap — run before the first Jira operation of a session
+## Auth bootstrap: run before the first Jira operation of a session
 
 The bearer token lives in the macOS keychain item `jira-cli`. Validate it:
 
@@ -27,7 +27,7 @@ TOKEN=$(jira issue view WD-52 --debug 2>&1 | grep "Authorization: Bearer" | awk 
 security add-generic-password -s "jira-cli" -a "JoelTurner" -w "$TOKEN" -U
 ```
 
-If that token also fails, ask the user to run `jira init` in their terminal, then repeat the capture. A `"Field 'summary' cannot be set..."` error on create is a stale token wearing a disguise, not a screen configuration problem — re-run this bootstrap.
+If that token also fails, ask the user to run `jira init` in their terminal, then repeat the capture. A `"Field 'summary' cannot be set..."` error on create is a stale token wearing a disguise, not a screen configuration problem; re-run this bootstrap.
 
 ## Wiki markup
 
@@ -53,7 +53,7 @@ Descriptions and comments are **Jira wiki markup, not Markdown**: `h2. Heading`,
 
 - **Create an Epic**: same call with `"issuetype": {"name": "Epic"}` plus the Epic Name custom field: `"customfield_11103": "Short epic name"`.
 - **Link a child to its Epic**: set the Epic Link custom field at creation: `"customfield_11102": "WD-<epic>"`.
-- **"is blocked by" link**: `POST $BASE/issueLink`. Direction is easy to invert — verified: `inwardIssue` is the **blocker**, `outwardIssue` is the **blocked**:
+- **"is blocked by" link**: `POST $BASE/issueLink`. Direction is easy to invert; verified: `inwardIssue` is the **blocker**, `outwardIssue` is the **blocked**:
 
   ```bash
   curl -s -w "HTTP:%{http_code}" -X POST "$BASE/issueLink" \
@@ -82,13 +82,13 @@ Descriptions and comments are **Jira wiki markup, not Markdown**: `h2. Heading`,
   When in doubt, list live options with `GET $BASE/issue/WD-123/transitions`.
 
 - **Comment**: `POST $BASE/issue/WD-123/comment -d '{"body":"Wiki-markup text."}'`, expect `201`.
-- **List / search**: `GET $BASE/search?jql=<url-encoded JQL>&fields=summary,status,issuelinks&maxResults=50`. JQL cannot *filter* on issue links, but requesting `issuelinks` in `fields` returns each result's links **with the linked issues' statuses inline** — one call covers candidates and their blockers.
+- **List / search**: `GET $BASE/search?jql=<url-encoded JQL>&fields=summary,status,issuelinks&maxResults=50`. JQL cannot *filter* on issue links, but requesting `issuelinks` in `fields` returns each result's links **with the linked issues' statuses inline**, so one call covers candidates and their blockers.
 - **View**: `jira issue view WD-123 --comments 5`, or `GET $BASE/issue/WD-123`.
 - **Delete**: `DELETE $BASE/issue/WD-123`, expect `204`. Throwaway and scratch tickets only.
 
 ## Issue types and state model
 
-Implementation slices are **Story**, decisions are **Task**, bugs are **Bug** — the two populations stay visually distinct inside an Epic.
+Implementation slices are **Story**, decisions are **Task**, bugs are **Bug**: the two populations stay visually distinct inside an Epic.
 
 | Transition | Actor | When |
 |---|---|---|
@@ -98,7 +98,7 @@ Implementation slices are **Story**, decisions are **Task**, bugs are **Bug** �
 | → Done | **GitLab Jira integration** | An MR whose description carries `Closes WD-123` merges to `develop` |
 | → Selected for Development (bounce) | Reviewer | Substantive review failure, with a comment explaining why |
 
-Code-bearing tickets are closed by the merge, never by hand — on any path. Manual closure is correct only for tickets with no code attached: pure decisions, Epics, wontfix. Commits and MRs carrying the bare uppercase key (`WD-123`) appear on the ticket as comments and links via the GitLab integration, so the ticket tells the truth at every stage.
+Code-bearing tickets are closed by the merge, never by hand, on any path. Manual closure is correct only for tickets with no code attached: pure decisions, Epics, wontfix. Commits and MRs carrying the bare uppercase key (`WD-123`) appear on the ticket as comments and links via the GitLab integration, so the ticket tells the truth at every stage.
 
 ## When a skill says "publish to the issue tracker"
 
@@ -113,8 +113,8 @@ Create a Jira issue per the conventions above: `[SLUG]` prefix, type by the tabl
 Used by `/wayfinder`. The **map** is an Epic; tickets are its children.
 
 - **Map**: an Epic labelled `wayfinder:map`, its description holding the Notes / Decisions-so-far / Fog body (wiki markup). Update it with `PUT $BASE/issue/WD-<map> -d '{"fields":{"description":"..."}}'`.
-- **Child ticket**: a **Task** epic-linked to the map, labelled `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Never the slug label — decision tickets stay invisible to sandcastle.
+- **Child ticket**: a **Task** epic-linked to the map, labelled `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Never the slug label: decision tickets stay invisible to sandcastle.
 - **Blocking**: native "is blocked by" links, created as above. A ticket is unblocked when every blocker is Done.
-- **Frontier query**: one search — JQL scoped to the map's children and open statuses, with `fields=issuelinks`; drop any result holding an inbound `is blocked by` link to an issue that is not Done; first in key order wins.
+- **Frontier query**: one search, JQL scoped to the map's children and open statuses, with `fields=issuelinks`; drop any result holding an inbound `is blocked by` link to an issue that is not Done; first in key order wins.
 - **Claim**: transition to In Progress (id 31), the session's first write.
-- **Resolve**: post the answer as a comment, transition to Done (id 41 — manual closure is correct here: no code attached), then append a context pointer to the map's Decisions-so-far.
+- **Resolve**: post the answer as a comment, transition to Done (id 41; manual closure is correct here: no code attached), then append a context pointer to the map's Decisions-so-far.

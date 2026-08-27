@@ -19,7 +19,7 @@ If the redacted output is not enough to diagnose the bug, say so and ask the use
 
 **This is the skill.** Everything else is mechanical. If you have a **tight** pass/fail signal for the bug (one that goes red on _this_ bug), you will find the cause; bisection, hypothesis-testing, and instrumentation all just consume it. If you don't have one, no amount of staring at code will save you.
 
-Spend disproportionate effort here. **Be aggressive. Be creative. Refuse to give up.**
+Spend disproportionate effort here.
 
 ### Ways to construct one, in roughly this order
 
@@ -44,15 +44,13 @@ Treat the loop as a product. Once you have _a_ loop, **tighten** it:
 - Can I make the signal sharper? (Assert on the specific symptom, not "didn't crash".)
 - Can I make it more deterministic? (Pin time, seed RNG, isolate filesystem, freeze network.)
 
-A 30-second flaky loop is barely better than no loop; a 2-second deterministic one is tight, a debugging superpower.
-
 ### Non-deterministic bugs
 
 The goal is not a clean repro but a **higher reproduction rate**. Loop the trigger 100×, parallelise, add stress, narrow timing windows, inject sleeps. A 50%-flake bug is debuggable; 1% is not, so keep raising the rate until it's debuggable.
 
 ### When you genuinely cannot build a loop
 
-Stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a redacted captured artifact (HAR file, log dump, core dump, screen recording with timestamps), or (c) permission to add temporary production instrumentation. Do **not** proceed to hypothesise without a loop.
+Stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a redacted captured artifact (HAR file, log dump, core dump, screen recording with timestamps), or (c) permission to add temporary production instrumentation.
 
 ### Completion criterion: a tight loop that goes red
 
@@ -101,7 +99,7 @@ If you cannot state the prediction, the hypothesis is a vibe: discard or sharpen
 
 Each probe must map to a specific prediction from Phase 3. **Change one variable at a time.**
 
-Sequential probing in one context is the default. But when the top hypotheses are independent and the loop is cheap to run, you may fan out: give each hypothesis to its own read-only subagent (pass `model: "sonnet"`) prompted to **refute** it (not confirm it), then arbitrate the returned evidence yourself — rival hypotheses tested by rivals counter anchoring on the first plausible idea.
+Sequential probing in one context is the default. But when the top hypotheses are independent and the loop is cheap to run, you may fan out: give each hypothesis to its own read-only subagent (pass `model: "sonnet"`) prompted to **refute** it (not confirm it), then arbitrate the returned evidence yourself. Rival hypotheses tested by rivals counter anchoring on the first plausible idea.
 
 Tool preference:
 

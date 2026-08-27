@@ -13,7 +13,6 @@ description: Migrate test files from `as` type assertions to @total-typescript/s
 
 Problems with `as` in tests:
 
-- Trained not to use it
 - Must manually specify target type
 - Double-as (`as unknown as Type`) for intentionally wrong data
 
@@ -104,15 +103,6 @@ getUser(fromAny({ body: { id: 123 } }));
 
 ## Workflow
 
-1. **Gather requirements** - ask user:
-   - What test files have `as` assertions causing problems?
-   - Are they dealing with large objects where only some properties matter?
-   - Do they need to pass intentionally wrong data for error testing?
+1. **Gather requirements** - Ask only what the request leaves unclear: which files, and whether any assertions are intentionally wrong data (those become `fromAny`).
 
-2. **Install and migrate**:
-   - [ ] Install: `npm i @total-typescript/shoehorn`
-   - [ ] Find test files with `as` assertions: `grep -r " as [A-Z]" --include="*.test.ts" --include="*.spec.ts"`
-   - [ ] Replace `as Type` with `fromPartial()`
-   - [ ] Replace `as unknown as Type` with `fromAny()`
-   - [ ] Add imports from `@total-typescript/shoehorn`
-   - [ ] Run type check to verify
+2. **Install and migrate**: Install with `npm i @total-typescript/shoehorn`, migrate every match of `grep -r " as [A-Z]" --include="*.test.ts" --include="*.spec.ts"` per the patterns above, add imports, run the type check.
