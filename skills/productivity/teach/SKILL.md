@@ -60,7 +60,9 @@ Each lesson should recommend a primary source for the user to read or watch. Thi
 
 Each lesson should contain a reminder to ask followup questions to the agent. The agent is their teacher, and can assist with anything that's unclear.
 
-Write lessons in plain language: complete sentences, terms spelled out on first use, no unexplained jargon.
+Write lessons in plain, literal language: short sentences, one idea per paragraph, terms spelled out on first use, and a literal phrase wherever one exists instead of a metaphor. Mark any source wording reproduced verbatim as a quotation; restate everything else in your own words.
+
+Settle the lesson's structure and its one tangible win before you write the file, then write it once; drafting it in full in your reasoning and again in the output doubles the cost without improving it.
 
 ## Assets
 

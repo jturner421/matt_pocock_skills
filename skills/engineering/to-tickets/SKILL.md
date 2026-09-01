@@ -81,4 +81,6 @@ Do NOT close or modify any parent issue.
 
 Local files additionally carry a `**Status:** ready-for-agent` line. Tracker issues additionally carry a `## Parent` section (a reference to the parent issue on the tracker) when the source was an existing issue.
 
+Write each ticket in plain, literal language: short sentences, one idea per paragraph, terms spelled out on first use, and a literal phrase wherever one exists instead of a metaphor.
+
 In either form, avoid specific file paths or code snippets: they go stale fast. Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it and note briefly that it came from a prototype. Trim to the decision-rich parts, not a working demo, just the important bits.

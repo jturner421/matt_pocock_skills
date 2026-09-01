@@ -14,9 +14,11 @@ The issue tracker and triage label vocabulary should have been provided to you. 
 
 2. Sketch out the seams at which you're going to test the feature. Prefer testing through the fewest seams possible, ideally one existing seam at the highest level. If new seams are needed, propose them at the highest point you can.
 
-Check with the user that these seams match their expectations.
+Check with the user that these seams match their expectations, and wait for their answer before writing the spec.
 
 3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `ready-for-agent` triage label - no need for additional triage.
+
+Write the spec in plain, literal language: short sentences, one idea per paragraph, terms spelled out on first use, and a literal phrase wherever one exists instead of a metaphor.
 
 <spec-template>
 

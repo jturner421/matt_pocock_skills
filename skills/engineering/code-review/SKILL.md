@@ -77,7 +77,7 @@ Present the two reports under `## Standards` and `## Spec` headings, verbatim or
 
 End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes.
 
-Write the report in plain language: complete sentences, terms spelled out on first use, no invented shorthand.
+Write the report in plain, literal language: short sentences, one idea per paragraph, terms spelled out on first use, and a literal phrase wherever one exists instead of a metaphor.
 
 ## Why two axes
 
