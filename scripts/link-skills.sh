@@ -47,6 +47,19 @@ for DEST in "${DESTS[@]}"; do
 
   mkdir -p "$DEST"
 
+  # Prune links left behind by skills renamed or removed from this repo. Only
+  # dangling links that point into the repo go; anything else in $DEST belongs
+  # to some other install and is left alone.
+  for link in "$DEST"/*; do
+    [ -L "$link" ] && [ ! -e "$link" ] || continue
+    case "$(readlink "$link")" in
+      "$REPO"/*)
+        rm "$link"
+        echo "pruned $(basename "$link") ($DEST)"
+        ;;
+    esac
+  done
+
   for i in "${!names[@]}"; do
     name="${names[$i]}"
     src="${srcs[$i]}"
