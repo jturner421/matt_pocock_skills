@@ -91,7 +91,7 @@ If you cannot state the prediction, the hypothesis is a vibe: discard or sharpen
 
 Each probe must map to a specific prediction from Phase 3. **Change one variable at a time.**
 
-Sequential probing in one context is the default. But when the top hypotheses are independent and the loop is cheap to run, you may fan out: give each hypothesis to its own read-only subagent (pass `model: "sonnet"`) prompted to **refute** it (not confirm it), then arbitrate the returned evidence yourself. Rival hypotheses tested by rivals counter anchoring on the first plausible idea.
+When the top hypotheses are independent and the loop is cheap to run, fan out: give each hypothesis to its own read-only subagent (pass `model: "sonnet"`) prompted to **refute** it (not confirm it), then arbitrate the returned evidence yourself. Rival hypotheses tested by rivals counter anchoring on the first plausible idea.
 
 Tool preference:
 

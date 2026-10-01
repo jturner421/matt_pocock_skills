@@ -11,6 +11,6 @@ Tell it what decision or question the findings feed, not just the question itsel
 
 Its job:
 
-1. Investigate the question against **primary sources** (official docs, source code, specs, first-party APIs), not a secondary write-up of them. Follow every claim back to the source that owns it.
+1. Investigate the question against **primary sources** (official docs, source code, specs, first-party APIs), not a secondary write-up of them. Follow every claim back to the source that owns it. Check specifics that change over time (versions, limits, prices, what is allowed or required) against a fetched source even when you feel confident; don't write them from training knowledge.
 2. Write the findings to a single Markdown file, citing each claim's source. Mark any source wording reproduced verbatim as a quotation; restate everything else in your own words. Write the note in plain, literal language: short sentences, one idea per paragraph, terms spelled out on first use, and a literal phrase wherever one exists instead of a metaphor.
 3. Save it where the repo already keeps such notes; match the existing convention, and if there is none, put it somewhere sensible and say where.

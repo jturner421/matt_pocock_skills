@@ -16,6 +16,8 @@ Communication to and from subagents should be sparse. Communicate primarily thro
 
 **Implementer subagents** should be run in the background where possible for maximum concurrency.
 
+This skill runs unattended. A message with no tool call ends your turn and stops the run, so don't end one to summarize progress, announce the next step, offer to continue, or report a milestone: put status notes in the same message as your next tool call. Stop only when nothing can advance without the user, or before a risky or destructive step. A subagent still running means the work isn't done; wait for its output.
+
 ## Steps
 
 1. Read the spec and tickets to understand the task graph.
@@ -27,6 +29,8 @@ Communication to and from subagents should be sparse. Communicate primarily thro
 4. Use **implementer subagents** to implement each ticket, each in its own worktree on its own branch. Each implementer subagent:
    - confirms its worktree is based on the integration branch before starting, and resets onto it if not;
    - calls the Skill tool with `tdd` to build the ticket;
+   - keeps working until the ticket is done, and adds no features, tests, files, docs or refactors the ticket didn't ask for (it mentions them in its report instead) and no reviewer sub-agents;
+   - runs a real check that exercises the change (the project's tests, type-checker, or build) before reporting done: a syntax-only check, or one that failed to start, does not count; if none can run, it says which and why;
    - merges the integration branch tip into its own branch before reporting done
 
 5. Once an **implementer subagent** completes, merge its work to the integration branch with a **merger subagent**.
