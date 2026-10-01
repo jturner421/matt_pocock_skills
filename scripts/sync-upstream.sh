@@ -66,7 +66,6 @@ Merge stopped on conflicts. Expected hotspots:
 
 Resolve keeping YOUR orchestration/model-tier changes; take upstream's new
 skills and content additions. Then: git add -A && git merge --continue.
-The `resolving-merge-conflicts` skill can drive this.
 EOF
   else
     echo "Merge failed before producing conflicts — see git's message above." >&2

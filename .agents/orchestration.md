@@ -113,7 +113,6 @@ the skill is a thin worker discipline.
 | implement | Opus orchestrating Sonnet workers | Well-specified by construction (spec/tickets exist). Fable appears as checkpoint advisor. In an autonomous loop (e.g. sandcastle), a Sonnet worker may hold the seat itself; the skill then requires it to arrange capable-model plan refutation and diff review. |
 | code-review | Opus | Bounded diff against explicit rubrics; Sonnet sub-reviewers. |
 | triage | Opus | State-machine discipline; claim-verification can fan out to Sonnet. |
-| resolving-merge-conflicts | Opus | Intent-tracing over a bounded conflict set. |
 | domain-modeling | Inherits caller's seat | A discipline invoked inside other skills, not a session of its own. |
 | tdd | Inherits worker's seat | The implementation loop's discipline, typically Sonnet under advisor oversight. |
 | prototype | Sonnet/Opus | Throwaway speed over polish; escalate only if the design question itself is the hard part. |
