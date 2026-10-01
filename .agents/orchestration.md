@@ -111,7 +111,10 @@ the skill is a thin worker discipline.
 | to-spec | Opus, Fable if ambiguity is high | Synthesis of an already-had conversation is Opus work; Fable when the spec will lock in architecture. |
 | to-tickets | Opus | Decomposition of a settled spec; slicing is judgment but bounded. |
 | implement | Opus orchestrating Sonnet workers | Well-specified by construction (spec/tickets exist). Fable appears as checkpoint advisor. In an autonomous loop (e.g. sandcastle), a Sonnet worker may hold the seat itself; the skill then requires it to arrange capable-model plan refutation and diff review. |
+| implement-spec | Opus orchestrating Sonnet workers | Same shape as implement at spec scale: the orchestrator walks the ticket frontier and dispatches tdd-driven implementer and merger subagents. |
 | code-review | Opus | Bounded diff against explicit rubrics; Sonnet sub-reviewers. |
+| pr | Sonnet/Opus | Fills a fixed template from a finished diff; Opus when the merge-danger call (door, blast radius) needs real judgment. |
+| retro | Opus | Reads a whole session's sources and ranks environment fixes by severity; bounded judgment over a known transcript. |
 | triage | Opus | State-machine discipline; claim-verification can fan out to Sonnet. |
 | domain-modeling | Inherits caller's seat | A discipline invoked inside other skills, not a session of its own. |
 | tdd | Inherits worker's seat | The implementation loop's discipline, typically Sonnet under advisor oversight. |
