@@ -8,8 +8,8 @@ link here instead of repeating model-selection rules.
 | Model | Role in this fork |
 |-------|-------------------|
 | Haiku | High-volume mechanical steps: file inventory, log scanning, formatting sweeps. |
-| Sonnet | Default worker. Implementation, test-writing, focused research reads, per-file review passes. |
-| Opus | Default orchestrator for well-specified work. Plans, decomposes, dispatches Sonnet workers, integrates results. |
+| Sonnet (`model: "sonnet"`, currently Sonnet 5.5) | Default worker. Implementation, test-writing, focused research reads, per-file review passes. |
+| Opus (`model: "opus"`, currently Opus 5.5) | Default orchestrator for well-specified work. Plans, decomposes, dispatches Sonnet workers, integrates results. |
 | Fable (`model: "fable"`, currently Fable 5.1) | Advisor and escalation tier. Reviews plans and finished work at checkpoints, resolves ambiguity, arbitrates disagreement. Takes the orchestrator or judging seat when unknown density or judgment density is high. |
 
 ## The advisor pattern (default shape)
@@ -44,9 +44,32 @@ is then bottlenecked by clarifying unknowns, which is Fable's edge:
 Keep Opus as orchestrator when the work is well-specified: tickets with
 acceptance criteria, mechanical migrations, review of a bounded diff.
 
-## Fable 5.1 notes
+## Current-model notes
 
-Two findings from Anthropic's Fable 5.1 prompting guide bear on this doctrine:
+On a Claude subscription or the Anthropic API, the `opus` and `sonnet` aliases
+resolve to Opus 5.5 and Sonnet 5.5, so skills pass aliases and need no pinning
+(the Agent tool accepts only aliases). Other providers resolve `sonnet` to an
+older model; pin there with `ANTHROPIC_DEFAULT_SONNET_MODEL` /
+`ANTHROPIC_DEFAULT_OPUS_MODEL`, not in a skill.
+
+From Anthropic's Opus 5.5 and Sonnet 5.5 prompting guides:
+
+- Effort is the thinking control; prompt lines asking for more or less
+  thinking are less reliable. Opus 5.5 at `medium` (its default) matches
+  Opus 5 at `high`, so run orchestrator sessions at `medium` and reserve
+  `xhigh`/`max` for work where a gain was measured.
+- Sonnet 5.5 workers at `low`/`medium` effort tend to check in before the work
+  is done, and at every effort add tests, docs and files nobody asked for; at
+  `xhigh`/`max` they launch their own reviewer sub-agents. Coding briefs
+  (implement, implement-spec) therefore carry a carry-through-and-scope
+  clause and a real-check verification rule.
+- Sonnet 5.5 answers from training knowledge when a search would catch a
+  changed detail; research tells its worker to check such specifics.
+- Opus 5.5 sustains long unattended runs with parallel sub-agents, but ends
+  turns with progress reports; implement-spec names the stops it should not
+  make.
+
+From Fable 5.1's guide:
 
 - Parallel sub-agents are dependable, and the orchestrator should keep working
   while they run rather than block on each one. The skills no longer treat
