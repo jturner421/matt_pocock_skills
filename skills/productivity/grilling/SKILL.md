@@ -25,4 +25,6 @@ Each round the user answers reshapes the tree: settled decisions push the fronti
 
 Finding _facts_ is your job, never the user's. When a frontier question needs a fact from the environment (filesystem, tools, etc.), look it up yourself when a single read or search settles it; dispatch a sub-agent for anything larger, and several in parallel when multiple facts are open. Don't ask the user for anything you could look up yourself. Don't block on it: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait for the sub-agent to report; ask the rest of the frontier now. The _decisions_ are the user's: put each to them and wait.
 
+A recommended answer rests on a verified mechanism. When the behaviour it depends on (a framework default, a tool's semantics, where a listener lives) has not been looked up this session, look it up before the round goes out, or move the question to the next round. The user accepts recommendations as given; reversing one costs a round. "I believe", "probably", or "you know better" in a draft question marks a fact to look up, not a question to ask.
+
 The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Do not act on it until the user confirms you have reached a shared understanding.
