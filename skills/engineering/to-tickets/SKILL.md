@@ -81,6 +81,8 @@ Do NOT close or modify any parent issue.
 
 Local files additionally carry a `**Status:** ready-for-agent` line. Tracker issues additionally carry a `## Parent` section (a reference to the parent issue on the tracker) when the source was an existing issue.
 
+Every acceptance criterion is satisfiable by the ticket's assignee. A step that needs host access, a tracker or CI setting, or a human eye goes in its own `ready-for-human` ticket, never in an agent ticket. A count or name in a ticket comes from a command run in this session; quote none you did not run.
+
 Write each ticket in plain, literal language: short sentences, one idea per paragraph, terms spelled out on first use, and a literal phrase wherever one exists instead of a metaphor.
 
 In either form, avoid specific file paths or code snippets: they go stale fast. Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it and note briefly that it came from a prototype. Trim to the decision-rich parts, not a working demo, just the important bits.
