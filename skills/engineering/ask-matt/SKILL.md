@@ -89,3 +89,7 @@ Off the main flow entirely.
 ## Precondition
 
 **`/setup-matt-pocock-skills`**: run before your first engineering flow to configure the issue tracker, triage labels, and doc layout the other skills assume. Custom issue trackers also work.
+
+## WIWD orchestrator
+
+**`/dev-flow`** (fork-only): the orchestrator over this map for WIWD repositories on Jira Data Center with sandcastle and haft. In one of those repos, start there instead of here: it primes from haft, offers the entry doors, binds the decision, publishes the build spec and tickets, and ends at the release. The standalone skills above still apply inside it.

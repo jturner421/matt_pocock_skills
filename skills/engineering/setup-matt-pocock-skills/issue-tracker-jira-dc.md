@@ -52,6 +52,7 @@ Descriptions and comments are **Jira wiki markup, not Markdown**: `h2. Heading`,
   ```
 
 - **Create an Epic**: same call with `"issuetype": {"name": "Epic"}` plus the Epic Name custom field: `"customfield_11103": "Short epic name"`.
+- **Build spec**: the spec `/to-spec` produces is the Epic's description, set at creation or with `PUT $BASE/issue/WD-<epic> -d '{"fields":{"description":"..."}}'`. An Epic never carries `ready-for-agent` or the slug label.
 - **Link a child to its Epic**: set the Epic Link custom field at creation: `"customfield_11102": "WD-<epic>"`.
 - **"is blocked by" link**: `POST $BASE/issueLink`. Direction is easy to invert; verified: `inwardIssue` is the **blocker**, `outwardIssue` is the **blocked**:
 
