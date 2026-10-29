@@ -40,6 +40,10 @@ renames skills, re-run `scripts/link-skills.sh`.
   concern; the fork does not create or re-sync `docs/` pages for skills it
   adds **or modifies** — upstream's pages drift from the fork's behaviour and
   that is accepted.
+- Fork-owned skills are not added to `.claude-plugin/plugin.json`. The
+  plugin manifest is upstream's publishing surface and a merge hotspot; the
+  fork installs through `scripts/link-skills.sh`, which links every promoted
+  skill regardless of the manifest.
 
 ## Fork-owned files
 
@@ -49,3 +53,8 @@ Files that exist only in this fork (upstream never sees them):
   Jira Data Center tracker template (curl/REST conventions, WD project,
   wayfinding operations). Referenced by insertion-only additions in that
   skill's SKILL.md.
+- `skills/engineering/dev-flow/`: the WIWD orchestrator (`SKILL.md`,
+  `DESIGN.md`, `agents/openai.yaml`): prime from haft, entry, the bound
+  decision, build spec and tickets, the release decision. Moved here from
+  `~/.claude/skills/dev-flow` on 2026-10-29. `DESIGN.md` §11 records which
+  artifacts haft owns and which the skills own.

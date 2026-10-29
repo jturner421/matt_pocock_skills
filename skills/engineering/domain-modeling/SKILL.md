@@ -65,6 +65,6 @@ When a term is resolved, update `GLOSSARY.md` right there. Don't batch these up:
 
 `GLOSSARY.md` is a glossary and nothing else: no implementation details, no spec content, no scratch notes.
 
-### Offer ADRs sparingly
+### Offer a decision record sparingly
 
-Only offer an ADR when the three-part test in [ADR-FORMAT.md](./ADR-FORMAT.md) passes: hard to reverse, surprising without context, and the result of a real trade-off.
+Only offer one when the three-part test in [ADR-FORMAT.md](./ADR-FORMAT.md) passes: hard to reverse, surprising without context, and the result of a real trade-off. Its form and location come from `docs/agents/domain.md` when that file names a decision store; otherwise it is an ADR in `docs/adr/`.
