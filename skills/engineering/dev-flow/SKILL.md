@@ -59,6 +59,7 @@ Present the decision point: which tickets go to the agent, and how. You propose;
 
 - **Batch**: `mise run sandcastle` works the labeled, unblocked frontier, one branch and one MR per ticket; blocked tickets wait, so run again after MRs merge to pick up the newly unblocked wave.
 - **Single ticket**: `mise run sandcastle WD-123`.
+- Either lane takes `--codex-review=always|never` to force or skip the Codex second review for the run; the default gate is in DESIGN.md §6. The run checks the Codex login and the sandbox image before it starts.
 - **In-session**: transition the ticket to In Progress, then `/implement` for the work, `/gl:commit` to commit, `/gl:create_mr` for the MR.
 
 The skill ends here: label applied, command handed over. Tickets close when their MR merges into develop (GitLab Jira integration); nobody closes code-bearing tickets by hand. Verification of the decision's predictions returns at the next session's step 0.

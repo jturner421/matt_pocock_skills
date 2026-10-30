@@ -1,6 +1,6 @@
 # Integrated Development Workflow: Design
 
-**Written:** 2026-08-26. **Revised:** 2026-10-29. **Status:** implemented; the pilot ran on SDS-Box on 2026-08-26. The surviving pilot record is `SDS-Box/docs/dev-flow-runbook.md` and `SDS-Box/docs/pilot-notes.md`; the implementation work order the first version named was not kept.
+**Written:** 2026-08-26. **Revised:** 2026-10-30. **Status:** implemented; the pilot ran on SDS-Box on 2026-08-26. The surviving pilot record is `SDS-Box/docs/dev-flow-runbook.md` and `SDS-Box/docs/pilot-notes.md`; the implementation work order the first version named was not kept.
 **Pilot repository:** SDS-Box. The pipeline itself is repository-agnostic; see §8.
 
 This document is the authority for target behavior.
@@ -12,7 +12,7 @@ A single integrated process that takes work from first discussion to closed tick
 - **Session skills** (Matt Pocock skills fork at `/Users/jwt/skills`, linked globally): `wayfinder`, `grill-with-docs`, `to-spec`, `to-tickets`, `implement`, `handoff`, `prototype`, plus the rest of the engineering bucket. `dev-flow` itself is a fork-owned skill in the same tree.
 - **haft** (`.haft/` in governed repos): the durable project memory: problems, decisions, notes, evidence, and what has gone stale. Its specification lifecycle is not used (§11).
 - **Jira Data Center** (`https://cfatl-jira.nsapps.dcn/jira`, project `WD`): all tickets for all repos, scoped per-repo by slug labels.
-- **Sandcastle fork** (`/Users/jwt/sandcastle`, branch `local`): the AFK implementation loop: Sonnet worker, Opus `ralph-advisor` in-loop gate, Fable reviewer phase.
+- **Sandcastle fork** (`/Users/jwt/sandcastle`, branch `local`): the AFK implementation loop: Sonnet worker with the Opus `ralph-advisor` in-loop gate, a gated Codex second review, and an Opus 5.5 reviewer whose verdict decides the merge request. Its sandbox image carries the pinned haft CLI. The fork's own decisions are in its `docs/adr/` up to ADR 0024 (2026-10-30) and in `.haft/decisions/` after that.
 - **GitLab** (self-hosted, e.g. `cfsr.sso.dcn/WIWD/wiwd-sds-box`): merge requests and, via its built-in Jira issues integration, ticket linking and closure.
 - **Personal Claude assets** (`~/.claude`): the `jira-planning` skill, the `/gl:commit` and `/gl:create_mr` commands, and the `h-*` skills that `haft init` installs.
 
@@ -34,9 +34,10 @@ One structural assumption: a single Jira project (`WD`) shared across repositori
 | `jira-planning` | `~/.claude/skills/jira-planning` | Jira DC mechanics: auth bootstrap, curl creation, epic linking, wiki markup |
 | `/gl:commit`, `/gl:create_mr` | `~/.claude/commands/gl/` | Manual-path commit and MR creation via `glab` |
 | `h-*` skills | `~/.claude/skills`, written by `haft init` | `h-verify`, `h-frame`, `h-decide`, `h-note`: the haft surfaces dev-flow calls |
-| Sandcastle fork | `/Users/jwt/sandcastle` (branch `local`) | AFK loop: batch mode and single-ticket mode |
-| Per-repo consumer | `<repo>/.sandcastle/` | Dockerfile, prompts, env for the loop |
-| haft | `<repo>/.haft/` | Project memory: ProblemCards, DecisionRecords, notes, evidence |
+| Sandcastle fork | `/Users/jwt/sandcastle` (branch `local`) | AFK loop: batch mode and single-ticket mode; the worker, Codex and reviewer phases, the verdict, the merge request |
+| Per-repo consumer | `<repo>/.sandcastle/` | Dockerfile (court CAs, pinned Codex CLI, pinned haft CLI), prompts, entry scripts, env for the loop |
+| Codex login | host `~/.codex/auth.json` | Credential for the Codex second review; a copy without the refresh token is mounted into that phase's sandbox only |
+| haft | `<repo>/.haft/` and the host CLI, at the version the fork pins | Project memory: ProblemCards, DecisionRecords, notes, evidence. The loop's run records are notes here |
 | Tracker doc | `<repo>/docs/agents/issue-tracker.md` | Per-repo Jira operations reference for the skills |
 | Domain doc rules | `<repo>/docs/agents/domain.md` | Where the glossary and the decision store live |
 | GitLab Jira issues integration | GitLab project settings | Commit/MR linking into tickets; auto-transition on merge |
@@ -69,9 +70,12 @@ Every build spec and ticket names the DecisionRecord ids it rests on. Tickets ar
 
 dev-flow's job ends here: label applied, launch command handed over.
 
-**Stage 5: Implementation and review.** Sandcastle's two-phase architecture is unchanged in spirit: Sonnet worker with the Opus `ralph-advisor` in-loop gate, then the Fable reviewer. What changes is branch handling and ticket state (§6, §4).
+**Stage 5: Implementation and review.** Three phases per ticket, each in a fresh container on the ticket's branch (fork ADRs 0021, 0022, 0024):
+- **Worker** (Sonnet) with the Opus `ralph-advisor` gating its plan and its diff. Before the agent starts, the sandbox creates haft's project database from the repo's `.haft/project.yaml`; the worker reads the decisions that govern the files it touches (`haft decision governing-set`, `haft graph explore`) and the earlier run records, implements test-first, commits as `RALPH: WD-123 — …`, comments on the ticket, and writes its run record as a haft note (`<KEY> run record (worker)`) through `haft artifact create`, by hand in the same layout if haft fails.
+- **Codex second review**, only on tickets the gate selects (`--codex-review=always|never`, else a `codex-review` or `no-codex-review` ticket label, else under `auto`: attempt 2, a path in the entry script's risk globs, or more non-test changed lines than its threshold). A read-only Codex run returns structured findings, each with a severity and a `breaksRequirement` flag. A failed Codex phase halts the run: no reviewer, no merge request, the ticket stays In Progress, a resume file is written, and `main.mts WD-123 --resume-review` continues from this phase.
+- **Reviewer** (Opus 5.5) audits the branch against the ticket, runs the quality gates, adjudicates every Codex finding (`fixed`, `rejected`, `deferred`), fixes what it can as `RALPH-REVIEW: WD-123 — …`, runs `haft check` and reports new drift on a decision the diff touched, writes its own run record, and ends with a **verdict**: `pass`, `retry`, or `draft`.
 
-**Stage 6: Merge request.** After the Fable review passes for a ticket, the **harness** pushes the ticket's branch and opens **one merge request per ticket**, targeting `develop`, title `WD-123: …`, description containing `Closes WD-123`. On the manual path, `/gl:create_mr` does the same.
+**Stage 6: Merge request.** Every reviewed ticket ends in a merge request opened by the **harness**: one per ticket, targeting `develop`, title `WD-123: …`, description containing `Closes WD-123` and a "Second review (Codex)" section. A `pass` opens a normal merge request. A `draft` opens a draft merge request carrying the reviewer's objections, which GitLab will not merge; a `critical`, `high`, or requirement-breaking Codex finding left unfixed turns a `pass` into a draft. A `retry` is allowed once per ticket, on attempt 1 only: the reviewer has moved the ticket back to Selected for Development with a different approach as the comment, no merge request opens, and the next run works the same branch as attempt 2 with that comment as its brief. On the manual path, `/gl:create_mr` opens the merge request.
 
 **Stage 7: Merge and closure.** A human reviews and accepts the MR in GitLab. Acceptance deletes the source branch (project default) and GitLab's Jira integration transitions the ticket to Done. Nobody closes code-bearing tickets by hand, on either path. Commits and MRs mentioning the key have been appearing on the ticket as comments and links throughout, so the web interface tells the truth at every stage.
 
@@ -99,7 +103,8 @@ dev-flow's job ends here: label applied, launch command handed over.
 | → In Progress | Worker (AFK) or human/dev-flow (in-session) | At ticket pickup |
 | In Progress (stays) | none | Through commit, review, and open MR; stage visible in comments and the MR |
 | → Done | **GitLab Jira integration** | MR with `Closes WD-123` merges into `develop` |
-| → Selected for Development (bounce) | Fable reviewer | Substantive review failure; comment explains why; no MR opened; label retained so the next run picks it up |
+| → Selected for Development (retry) | Reviewer, verdict `retry`, attempt 1 only | The work needs a different approach the reviewer can state; comment is the next worker's brief; no MR opened; label retained. On attempt 2 the harness treats `retry` as `draft` |
+| In Progress (stays), draft MR | Reviewer, verdict `draft`, or an unfixed major Codex finding | Not fit to merge as is; a draft MR carries the objections; the human decides: fix on the branch, close the draft and send the ticket back (next run starts fresh at attempt 1), or send it back with the draft open (next run is attempt 2 on the same branch) |
 
 **Close-at-commit is retired everywhere.** The old sandcastle prompt step and the retired `/cl:*` family both closed tickets at commit; that behavior is removed on all paths. Manual closure remains only for tickets with no code attached (pure decisions, Epics, wontfix).
 
@@ -118,11 +123,13 @@ Ownership split: **to-tickets owns slicing** (its rules and its quiz-the-user st
 - Commits: AFK path `RALPH: WD-123 — description`; manual path `WD-123: description`. Every commit carries the bare uppercase key.
 - MR: title `WD-123: …`, description contains `Closes WD-123`, target `develop`. (With the integration active, GitLab also auto-adds the closing line when the branch name contains the key.)
 
-**Batch mode.** The loop works one ticket per iteration, sequentially. Ticket selection is **deterministic frontier preflight**, in code rather than prompt judgment: the JQL returns candidates (slug label + status in Backlog/Selected for Development), then one REST call per candidate fetches `issuelinks`, and any candidate with an inbound "is blocked by" link to a non-Done issue is skipped. Plain JQL cannot traverse links without add-ons, hence the two-step. Each selected ticket gets its own branch off `develop`; the advisor gates plans and diffs in-loop; the Fable reviewer audits the ticket's branch; on pass, the harness pushes and opens the MR. Merge-to-head is retired.
+**Batch mode.** The loop works one ticket per iteration, sequentially. Ticket selection is **deterministic frontier preflight**, in code rather than prompt judgment: the JQL returns candidates (slug label + status in Backlog/Selected for Development), then one REST call per candidate fetches `issuelinks`, and any candidate with an inbound "is blocked by" link to a non-Done issue is skipped. Plain JQL cannot traverse links without add-ons, hence the two-step. Each selected ticket gets its own branch off `develop`; the advisor gates plans and diffs in-loop; the Codex gate is decided on the host after the worker commits; the reviewer audits the ticket's branch and emits the verdict; the harness pushes and opens the MR, normal or draft. Merge-to-head is retired.
+
+**Launch check.** Unless `--codex-review=never`, the entry script checks on the host, before any sandbox is built, that `~/.codex/auth.json` exists and its access token outlasts the run's margin, and probes Codex once in the sandbox image. A failure aborts the run and prints the fix. A gated ticket whose Codex phase fails mid-run halts the run with `.sandcastle/logs/<KEY>.resume.json`; the remaining tickets stay queued, and `--resume-review` continues that ticket from the Codex phase with no new worker run.
 
 **Waves.** MRs are human-approved, so a ticket's dependents stay excluded until its MR actually merges, even within the same run. Batch runs therefore process the backlog in waves: run, review and merge, run again, and the newly unblocked frontier flows in. A reviewer bounce keeps dependents excluded the same way.
 
-**Single-ticket mode.** `mise run sandcastle WD-123`: same transitions, same branch and MR conventions, existing MR step.
+**Single-ticket mode.** `mise run sandcastle WD-123`: same transitions, same branch and MR conventions, same three phases. `WD-123 --resume-review` continues a halted ticket.
 
 **Manual path.** Ticket → In Progress at start; `/implement` for the work; `/gl:commit` (Jira-key aware) and `/gl:create_mr` for commit and MR; closure at merge, same as the AFK path.
 
@@ -147,7 +154,7 @@ The pipeline is repository-agnostic. Bringing a new repo in:
 1. **GitLab project:** set the default branch to the integration branch (`develop` under git-flow); check `.gitlab-ci.yml` for rules keyed to the old default; enable delete-source-branch-by-default; configure the Jira issues integration (URL, token, comments, transitions).
 2. **Identity:** pick the slug label (e.g. `sds-box`) and the `[SLUG]` summary prefix; set `JIRA_SLUG` in `.claude.env`; new tickets must be labeled per the release-gate rule.
 3. **Tracker doc:** generate `docs/agents/issue-tracker.md` from the `issue-tracker-jira-dc.md` template (via `/setup-matt-pocock-skills`), including the Wayfinding operations section; adopt the triage label vocabulary.
-4. **Sandcastle consumer:** `.sandcastle/` from the fork template; `.env` populated; everything committed before the first run (the sandbox checkout only sees committed content).
+4. **Sandcastle consumer:** `.sandcastle/` from the fork template; `.env` populated; the image built (`sandcastle docker build-image`, which downloads the pinned haft release); everything committed before the first run (the sandbox checkout only sees committed content). Host prerequisites are in the fork's `docs/local-fork.md`: `glab`, a Jira token, Claude Code auth, a Codex login (or runs with `--codex-review=never`), and haft at the fork's pinned version.
 5. **Advisor:** `.claude/agents/ralph-advisor.md` present, and `.gitignore` must not blanket-ignore `/.claude/`.
 6. **haft:** `haft init` if the repo is to be governed; leave the spec onboarding unrun (§11). Edit `docs/agents/domain.md` to name `.haft/decisions/` as the decision store and `docs/adr/`, if it exists, as frozen history.
 7. **Pilot verification:** run one throwaway ticket through the full loop before releasing real work.
@@ -159,7 +166,7 @@ The pipeline is repository-agnostic. Bringing a new repo in:
 3. ScriptRunner (or similar) presence on the Jira instance would allow link-traversing JQL and simplify frontier preflight; not assumed, worth checking.
 4. Batch frontier discipline in practice: flagged for observation during the pilot.
 5. Bert-Legal onboarding later: needs a GitLab remote and migration of its pre-fork `.sandcastle/prompt.md` to the fork template.
-6. haft in the sandcastle container: install the CLI pinned to the host's version, have the worker read the governing set for the files it touches before planning, write run-record notes through `haft artifact create` instead of by hand, and have the reviewer run `haft check` and explain any new drift on a governed file. Its own ticket.
+6. ~~haft in the sandcastle container~~ Done 2026-10-30 in sandcastle fork 0.15.0 (its ADR 0024): the jira-dc image installs haft pinned by `HAFT_VERSION`, the sandbox bootstraps the project database at start, the worker reads the governing set (`haft decision governing-set`, `haft graph explore`) before planning and writes its run record through `haft artifact create note.record`, and the reviewer runs `haft check` and reports new drift on a decision the diff touched. Hand-written notes remain the fallback when haft fails.
 
 ## 10. Decision log
 
@@ -168,9 +175,11 @@ The pipeline is repository-agnostic. Bringing a new repo in:
 | Pilot | SDS-Box | Active development, GitLab remote, fork template and haft already in place |
 | Done semantics | At MR merge to `develop`, via GitLab integration, both paths | One meaning of Done project-wide; status accuracy was the founding requirement |
 | Release gate | Slug label applied at an explicit human decision point | Reuses sandcastle's existing JQL; one switch; protects decision tickets |
-| MR policy | One MR per ticket, opened by the harness after Fable review | Deterministic work belongs in code; independent mergeability; clean closure mapping |
+| MR policy | One MR per ticket, opened by the harness after the reviewer's verdict; a draft when the verdict is `draft` | Deterministic work belongs in code; independent mergeability; clean closure mapping |
 | Batch branching | Per-ticket branches off `develop`; frontier-only selection; waves | Every MR independently mergeable; blocked work waits exactly as it would for a human team |
-| Reviewer failure | Bounce to Selected for Development with comment | Keeps the ticket in the agent's view; the comment gives the next iteration what it needs |
+| Reviewer failure | `retry` once per ticket (bounce to Selected for Development with a comment); otherwise `draft` (fork ADR 0021) | Keeps the ticket in the agent's view; the comment gives the next iteration what it needs; a draft never merges unseen |
+| Second review (2026-10-29) | Gated Codex adversarial review between worker and reviewer; the reviewer adjudicates each finding; an unfixed major finding forces a draft; a failed phase halts the run and resumes by command (fork ADR 0022) | A second model family on trust boundaries, races and data loss, without replacing the reviewer; the harness, not a prompt, keeps it read-only and decides what a disagreement means |
+| haft in the sandbox (2026-10-30) | Pinned haft CLI in the jira-dc image; database bootstrapped at sandbox start; run records through `haft artifact create`; reviewer runs `haft check` (fork ADR 0024) | The loop reads the governing decisions it must not drift from and writes notes the host's `haft sync` imports; hand-written notes stay the fallback |
 | Container | Epic per effort; map = Epic; Task/Story/Bug typing | Matches existing jira-planning convention; web-UI traceability |
 | Slicing | Vertical slices on all paths; to-tickets owns the rules | Phase-per-story produced horizontal layers; retired |
 | Linking | GitLab built-in Jira issues integration only | Zero new infrastructure; also provides closure; DVCS connector deferred |
@@ -191,7 +200,7 @@ The skills own how a conversation produces an artifact. haft owns a record that 
 | Vocabulary | Skills | `GLOSSARY.md` |
 | Sharpening an idea | Skills | `grill-with-docs`, in conversation |
 | Build spec and tickets | Skills | `to-spec`, `to-tickets`, in Jira |
-| Implementation, review, retro | Skills and sandcastle | GitLab |
+| Implementation, review, retro | Skills and sandcastle | GitLab, plus the loop's run records as haft notes (`<KEY> run record (worker)` and `(reviewer)`) |
 | A problem framed but not scheduled | haft | ProblemCard, `h-frame` |
 | Options compared, when the comparison must be replayable | haft | `h-compare`; conversational by default |
 | A decision | haft | DecisionRecord, `h-decide`, bound by the human |
